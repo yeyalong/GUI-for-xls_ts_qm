@@ -5,6 +5,7 @@ import xlrd
 import xml.dom.minidom as xmldom  #通过minidom解析xml文件
 import os
 import shutil
+import xlwt
 
 class ExcelToXml():
     def __init__(self):
@@ -16,12 +17,14 @@ class ExcelToXml():
         self.list_source_value = []
         self.list_translate_type = []
         self.list_translate_value = []
+        self.language_value = 0
 
     def ReadExcel(self, excel_path, sheet_name, language):
         book = xlrd.open_workbook(excel_path)
         table = book.sheet_by_name(sheet_name)# 通过sheet名字获得sheet对象
         nrows = table.nrows    # 获取行总数
         ncols = table.ncols    # 获取列总数
+        self.language_value = language
 
         #遍历excel
         for nrow in range(0, nrows):  #遍历每一行
@@ -84,7 +87,22 @@ if __name__ == '__main__':
         for i in range(2, ncols):
             language_name = table.cell(0, i).value  # 取第一行的值
             source_file = './source/' + language_name + '/' + element + "_" + language_name[0:2] + ".ts"
+            source_dir = './source/' + language_name + '/'
+            default_file = './default/' + element + "_en.ts"
+
+            if os.path.exists(source_file) == False:
+                os.makedirs(source_dir)
+                shutil.copy(default_file, source_file)
+                domobj_source = xmldom.parse(source_file)  # 得到文档对象
+                elementobj_source = domobj_source.documentElement  # 得到元素对象
+                elementobj_source.setAttribute("language", language_name)
+                with open(source_file, 'w', encoding='utf-8') as source_file_write:
+                    domobj_source.writexml(source_file_write, encoding='utf-8')
+
             translate_file = './translate/' + language_name + '/' + element + "_" + language_name[0:2] + ".ts"
+            translate_dir = './translate/' + language_name + '/'
+            if os.path.exists(translate_dir) == False:
+                os.makedirs(translate_dir)
             shutil.copy(source_file, translate_file)
             excel_to_xml.ReadExcel(xls_name, element, language_name)
             excel_to_xml.WriteXml(translate_file)

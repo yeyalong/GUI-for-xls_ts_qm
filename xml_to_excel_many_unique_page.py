@@ -70,8 +70,8 @@ class GenerateExcel():
                         sheet.write(xml_to_excel_many_unique.j + xml_to_excel_many_unique.row_third_, index + 2, "")  # 写入translation的value
             xml_to_excel_many_unique.list_source_value.clear()
 
-        if os.path.exists(excel_path):
-            os.remove(excel_path)
+        # if os.path.exists(excel_path):
+        #     os.remove(excel_path)
         book.save(excel_path)
 
     def FindAllTs(self, dirname):
